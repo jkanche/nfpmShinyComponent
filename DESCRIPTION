@@ -1,0 +1,33 @@
+Package: networkViz
+Title: R interface to nfpm visualization
+Version: 0.0.1
+Authors@R: c( person("Jayaram", "Kancherla", 
+                      email="jayaram.kancherla@gmail.com",
+                      role = c("aut", "cre"))
+                    )
+            )
+Description: This package provides an API for interactive network visualization of gene-drug and gene-gene interactions.
+             The focus of a visualization is the flow of evidence between various does and uses an interactive sankey diagram
+             to visualize the network.
+Imports:
+    htmltools,
+    rjson,
+    methods
+Suggests:
+    testthat,
+    roxygen2,
+    knitr,
+    Biobase,
+    shiny,
+    RColorBrewer,
+    magrittr
+Collate:
+  'NfpmViz-class.R'
+  'utils.R'
+VignetteBuilder: knitr
+Depends: R (>= 3.4.0)
+License: Artistic-2.0
+Encoding: UTF-8
+LazyData: true
+biocViews: Visualization, GUI
+RoxygenNote: 6.0.1

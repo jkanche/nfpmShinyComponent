@@ -1,0 +1,1 @@
+polymer-bundler --inline-scripts --inline-css --strip-comments nfpm-viz.html > build/nfpm.html 
