@@ -27639,26 +27639,26 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
                     var dragresize = d3.drag().on("end", dragr);
 
-                    var dragresizebar = recgroup
-                        .append("rect")
-                        .attr("class", "draghandle")
-                        .attr("x", function (d) {
-                            return d.rect.right - d.rect.left - 13;
-                        })
-                        .attr("y", function (d) {
-                            return d.rect.bottom - d.rect.top + 10;
-                        })
-                        .attr("width", function (d) {
-                            return d.rect.right - d.rect.left + 25;
-                        })
-                        .attr("height", function (d) {
-                            return 5;
-                        })
-                        .attr("fill", "blue")
-                        .attr("fill-opacity", 0.5)
-                        .attr("cursor", "ns-resize")
-                        .attr("style", "fill:blue;")
-                        .call(dragresize);
+                    // var dragresizebar = recgroup
+                    //    .append("rect")
+                    //    .attr("class", "draghandle")
+                    //    .attr("x", function (d) {
+                    //        return d.rect.right - d.rect.left - 13;
+                    //    })
+                    //    .attr("y", function (d) {
+                    //        return d.rect.bottom - d.rect.top + 10;
+                    //    })
+                    //    .attr("width", function (d) {
+                    //        return d.rect.right - d.rect.left + 25;
+                    //    })
+                    //    .attr("height", function (d) {
+                    //        return 5;
+                    //    })
+                    //    .attr("fill", "blue")
+                    //    .attr("fill-opacity", 0.5)
+                    //    .attr("cursor", "ns-resize")
+                    //    .attr("style", "fill:blue;")
+                    //    .call(dragresize);
 
                     function filterGraph(y, ldata) {
 
