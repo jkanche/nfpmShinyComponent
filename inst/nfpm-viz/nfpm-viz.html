@@ -185,7 +185,7 @@
 
                 var self = this;
 
-                var layout = d3.sankey().extent([[100, 10], [840, 900]]);
+                var layout = d3.sankey().extent([[100, 10], [740, 800]]);
 
                 function selectNodeClick(node) {
                     if (node.id.indexOf("rec^") != -1) {
@@ -205,15 +205,16 @@
 
                 function selectLinkClick(link) {
                     var info = self.shadowRoot.querySelector(".info");
+                    info.innerHTML = "";
 
                     var text =
-                        "<p> Link Selected : " +
+                        "<p> Evidence Selected : " +
                         link.source.title +
                         " --> " +
                         link.target.title +
                         "</p>";
-
-                    info.innerHTML = text + link.title;
+                        
+                    info.innerHTML = text + "<p>" + link.title + "</p>";
                 }
 
                 var diagram = d3
@@ -250,10 +251,10 @@
 
                     function dragr(d) {
                         var e = d3.event;
-                        console.log(d);
-                        console.log(e);
+                        var eventType = "up";
+                        if(e.y)
 
-                        if (e.sourceEvent.type == "mouseUp") {
+                        if (e.sourceEvent.type == "mouseup") {
                             var ltdata = filterGraph(e.sourceEvent.y, ldata);
                             drawSankey(layout(ltdata), data);
                         } else {
@@ -264,26 +265,26 @@
 
                     var dragresize = d3.drag().on("end", dragr);
 
-                    var dragresizebar = recgroup
-                        .append("rect")
-                        .attr("class", "draghandle")
-                        .attr("x", function (d) {
-                            return d.rect.right - d.rect.left - 13;
-                        })
-                        .attr("y", function (d) {
-                            return d.rect.bottom - d.rect.top + 10;
-                        })
-                        .attr("width", function (d) {
-                            return d.rect.right - d.rect.left + 25;
-                        })
-                        .attr("height", function (d) {
-                            return 5;
-                        })
-                        .attr("fill", "blue")
-                        .attr("fill-opacity", 0.5)
-                        .attr("cursor", "ns-resize")
-                        .attr("style", "fill:blue;")
-                        .call(dragresize);
+                    // var dragresizebar = recgroup
+                    //    .append("rect")
+                    //    .attr("class", "draghandle")
+                    //    .attr("x", function (d) {
+                    //        return d.rect.right - d.rect.left - 13;
+                    //    })
+                    //    .attr("y", function (d) {
+                    //        return d.rect.bottom - d.rect.top + 10;
+                    //    })
+                    //    .attr("width", function (d) {
+                    //        return d.rect.right - d.rect.left + 25;
+                    //    })
+                    //    .attr("height", function (d) {
+                    //        return 5;
+                    //    })
+                    //    .attr("fill", "blue")
+                    //    .attr("fill-opacity", 0.5)
+                    //    .attr("cursor", "ns-resize")
+                    //    .attr("style", "fill:blue;")
+                    //    .call(dragresize);
 
                     function filterGraph(y, ldata) {
 
@@ -328,10 +329,35 @@
                 }
 
                 var data = self.data;
+                
+                data.groups.forEach(function(g) {
+                  if(!Array.isArray(g.nodes)) {
+                    g.nodes = [g.nodes];
+                  };
+                });
 
-                layout.ordering(data.order);
+                // d3.json(self.data, function (data) {
+                if(data.order) {
+                  
+                  data.order.forEach(function(g) {
+                    g.forEach(function(d, i) {
+                      if(!Array.isArray(d)) {
+                        g[i] = [d];
+                      };
+                    });
+                    if(g.length == 1) {
+                      g.push([]);
+                    }
+                  });
+                  
+                  layout.ordering(data.order);
+                }
+                // console.log(data.links);
                 var ldata = layout(data);
                 drawSankey(ldata, data);
+                // });
+
+
                 self.shadowRoot.querySelector("paper-spinner-lite").active = false;
             }
         };

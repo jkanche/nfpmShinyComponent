@@ -137,25 +137,41 @@ NfpmViz <- setRefClass("NfpmViz",
         polymer_lib <- system.file(package="networkViz", 
                                    "nfpm-viz", "build", "nfpm.html")
       } else if (shiny) { 
+        # shiny::addResourcePath('networkViz', 
+        #                        system.file(package="networkViz", "nfpm-viz/build/")) 
         shiny::addResourcePath('networkViz', 
-                               system.file(package="networkViz", "nfpm-viz/build/")) 
-        polymer_lib <- "networkViz/nfpm.html" 
+                               system.file(package="networkViz", "nfpm-viz")) 
+        # polymer_lib <- "networkViz/nfpm.html" 
+        polymer_lib <- "networkViz/nfpm-viz.html"
       } else { 
-        polymer_lib <- "lib/nfpm-viz-1/nfpm.html" 
+        polymer_lib <- "lib/nfpm-viz-1/nfpm-viz.html" 
       } 
 
       list(
         webcomponents=htmlDependency(
           name="webcomponents",
           version="0.7.24",
-          src=system.file(package="networkViz", "nfpm-viz", "build"),
-          script="webcomponents-lite.js"),
+          src=system.file(package="networkViz", "nfpm-viz", "bower_components", "webcomponentsjs"),
+          script="webcomponents-loader.js",
+          all_files=TRUE),
         polymer=htmlDependency(
           name="nfpm-viz",
           version="1",
           head=paste0("<link rel='import' href='",  polymer_lib, "'>"),
-          src=system.file(package="networkViz", "nfpm-viz", "build"),
+          src=system.file(package="networkViz", "nfpm-viz"),
           all_files=TRUE)
+        # webcomponents=htmlDependency(
+        #   name="webcomponents",
+        #   version="0.7.24",
+        #   src=system.file(package="networkViz", "nfpm-viz", "build"),
+        #   script="webcomponents-lite.js",
+        #   all_files=TRUE),
+        # polymer=htmlDependency(
+        #   name="nfpm-viz",
+        #   version="1",
+        #   head=paste0("<link rel='import' href='",  polymer_lib, "'>"),
+        #   src=system.file(package="networkViz", "nfpm-viz", "build"),
+        #   all_files=TRUE)
       )
     }
   )
