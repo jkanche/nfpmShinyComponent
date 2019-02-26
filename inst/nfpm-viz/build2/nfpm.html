@@ -27686,19 +27686,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                                     var yLim = d3.event.sourceEvent.offsetY;
 
                                     var clData = JSON.parse(JSON.stringify(self.data));
-                                    if (clData.order) {
-                                        clData.order.forEach(function (g) {
-                                            g.forEach(function (d, i) {
-                                                if (!Array.isArray(d)) {
-                                                    g[i] = [d];
-                                                };
-                                            });
-                                            if (g.length == 1) {
-                                                g.push([]);
-                                            }
-                                        });
-                                        layout.ordering(clData.order);
-                                    }
+                                    layout.ordering(clData.order);
                                     var clcdata = layout(clData);
 
                                     clcdata.links.forEach(function (cll) {

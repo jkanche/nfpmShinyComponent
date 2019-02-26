@@ -1,13 +1,37 @@
+link_text.forEach(function(lt, lti) {
+  var plt = lt.substring(2, length(lt) - 1);
+  var pplt = plt.split(",");
+  flinks[lti] = pplt;
+  contItemlength = pplt.length;
+  pplt.forEach(function(fp, fpi) {
+    if(!item[fpi]) {
+      item[fpi] = "";
+    }
+    item[fpi] = item[fpi] + fp;
+  })
+});
+
+var contLength = items.length;
+items.forEach(function(it) {
+  var div = document.createElement("div");
+  div.className = "info-item";
+  div.textContent = it;
+  info.appendChild(div);
+});
+
+
 library(networkViz)
 
 test_network <- list("nodes"=list(list( "id"='a'), list("id"='b')),
-  "links"=list(list("source"='a', "target"='b', "value"=1)))
+                     "links"=list(list("source"='a', "target"='b', "value"=1)))
 
 chart <- networkViz:::NfpmViz(data=test_network)
 chart
 
 
 library(dplyr)
+
+
 
 dataParser <- function(input, fda, fda_other, rec) {
   
@@ -31,14 +55,6 @@ dataParser <- function(input, fda, fda_other, rec) {
         "nodes"=c(),
         "def_pos"=NULL
       ),
-      "fda"=list(
-        "type"="process",
-        "title"="FDA Approved Drugs",
-        "bundle"=NULL,
-        "id"="fda",
-        "nodes"=c(),
-        "def_pos"=NULL
-      ),
       "it"=list(
         "type"="process",
         "title"="Inferred Targets",
@@ -55,7 +71,8 @@ dataParser <- function(input, fda, fda_other, rec) {
         "nodes"=c(),
         "def_pos"=NULL
       )
-    )
+    ),
+    "rankSets": list(list(type='same', nodes=list()))
   )
   
   link <- list(      
@@ -105,16 +122,17 @@ dataParser <- function(input, fda, fda_other, rec) {
       
       fda_node <- node
       fda_node$title <- row$Drug
-      fda_node$id <- paste0("fda^", row$Drug)
+      fda_node$id <- paste0("rec^", row$Drug)
       
       json$nodes[[node_count]] <- fda_node
       node_count <- node_count + 1
       
-      json$groups$fda$nodes <- c(json$groups$fda$nodes, paste0("fda^", row$Drug))
+      json$groups$rec$nodes <- c(json$groups$rec$nodes, paste0("rec^", row$Drug))
+      json$ranksets[1]$nodes <- c(json$ranksets[1]$nodes, paste0("rec^", row$Drug))
       
       fda_link <- link
       fda_link$source <- paste0("mp^", row[["Gene or Protein"]]) 
-      fda_link$target <- paste0("fda^", row$Drug)
+      fda_link$target <- paste0("rec^", row$Drug)
       fda_link$type <- "FDA approved Drugs"
       fda_link$title <- paste0("alteration: ", row$Alteration)
       fda_link$id <- paste0(fda_link$source, " -> ", fda_link$target)
@@ -134,17 +152,20 @@ dataParser <- function(input, fda, fda_other, rec) {
       
       fda_other_node <- node
       fda_other_node$title <- row[["Group.1"]]
-      fda_other_node$id <- paste0("fda^", row[["Group.1"]], " (other tumor type)")
+      fda_other_node$id <- paste0("rec^", row[["Group.1"]], " (other tumor type)")
       
       json$nodes[[node_count]] <- fda_other_node
       node_count <- node_count + 1
       
-      json$groups$fda$nodes <- c(json$groups$fda$nodes, 
-                                 paste0("fda^", row[["Group.1"]], " (other tumor type)"))
+      json$groups$rec$nodes <- c(json$groups$rec$nodes, 
+                                 paste0("rec^", row[["Group.1"]], " (other tumor type)"))
+      
+      json$ranksets[1]$nodes <- c(json$ranksets[1]$nodes, paste0("rec^", row[["Group.1"]], " (other tumor type)"))
+      
       
       fda_link <- link
       fda_link$source <- paste0("mp^", row[["Group.2"]]) 
-      fda_link$target <- paste0("fda^", row[["Group.1"]], " (other tumor type)")
+      fda_link$target <- paste0("rec^", row[["Group.1"]], " (other tumor type)")
       fda_link$type <- "FDA approved Drugs"
       fda_link$title <- paste0("alteration: ", row$Alteration, "\n tumor drug is approved for: ", row[["Tumor in which it is approved"]])
       fda_link$id <- paste0(fda_link$source, " -> ", fda_link$target)
@@ -155,10 +176,6 @@ dataParser <- function(input, fda, fda_other, rec) {
   }
   
   if(nrow(rec) >= 1) {
-    
-    keep <- which(!(rec$`Gene or Protein` == rec$Path))
-    rec <- rec[keep, ]
-    
     unique_rec <- aggregate(rec, by=list(rec$Drug, rec$`Gene or Protein`), FUN=paste)
     
     for (i in rownames(unique_rec)) {
@@ -182,7 +199,7 @@ dataParser <- function(input, fda, fda_other, rec) {
       fda_link$id <- paste0(fda_link$source, " -> ", fda_link$target)
       
       json$links[[link_count]] <- fda_link
-      link_count <- link_count + 1 
+      link_count <- link_count + 1
     }
     
     for (i in unique(rec[["Drug"]])) {
@@ -194,6 +211,8 @@ dataParser <- function(input, fda, fda_other, rec) {
       node_count <- node_count + 1
       
       json$groups$rec$nodes <- c(json$groups$rec$nodes, paste0("rec^", i))
+      json$ranksets[1]$nodes <- c(json$ranksets[1]$nodes, paste0("rec^", i))
+      
     }
     
     for (i in unique(rec[["Gene or Protein"]])) {
@@ -242,17 +261,19 @@ dataParser <- function(input, fda, fda_other, rec) {
   }
   
   gmp <- json$groups$mp
-  gfda <- json$groups$fda
   git <- json$groups$it
   grec <- json$groups$rec
   
   # order <- list(list(gmp$nodes, gfda$nodes), list(list(git$nodes)), list(list(grec$nodes)))
   # json$order <- order
   
-  groups <- list(gmp, gfda, git, grec)
+  groups <- list(gmp, git, grec)
   json$groups <- groups
   json
 }
+
+
+
 
 # aggregate(Type3_df, by=list(Type3_df$Drug, Type3_df$`Gene or Protein`), FUN=paste)
 

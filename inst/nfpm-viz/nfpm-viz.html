@@ -15,10 +15,6 @@
                 display: inline-block;
                 border: 1px solid black;
                 border-radius: 5px;
-                /* transition: width 0.01s, height 0.01s; */
-                /* resize: vertical; */
-                /* overflow: auto; */
-                /* position: relative; */
             }
 
             #sankey {
@@ -65,7 +61,7 @@
                 display: grid;
                 grid-template-columns: 2fr minmax(250px, 1fr);
                 grid-auto-rows: max-content;
-                overflow: auto;
+                /* overflow: auto; */
             }
 
             .sankey {
@@ -76,11 +72,6 @@
             }
 
             .info-container {
-                /* grid-column: span 1; */
-                /* min-height: 300px; */
-                /* position: relative; */
-                /* min-height: 25%; */
-                /* top: 25%; */
                 text-align: center;
                 padding: 5px;
                 margin: 5px;
@@ -98,7 +89,7 @@
         <paper-spinner-lite active class="green"></paper-spinner-lite>
         <div class="chart">
             <div id="sankey" class="sankey">
-                <svg width="1100" height="950"></svg>
+                <svg width="100%" height="100%"></svg>
             </div>
             <div class="info-container">
                 <div class="info-con-container">
@@ -181,14 +172,35 @@
                 return 'epiviz-' + result;
             }
 
+            _getVerticalHeight(data) {
+                var mp_bin = 0, it_bin = 0, rec_bin = 0;
+
+                data.nodes.forEach(function (n) {
+                    if (n.id.indexOf("rec^") == 0) {
+                        rec_bin++;
+                    } else if (n.id.indexOf("it^") == 0) {
+                        it_bin++;
+                    } else if (n.id.indexOf("mp^") == 0) {
+                        mp_bin++;
+                    }
+                });
+
+                return Math.max(mp_bin, it_bin, rec_bin);
+            }
+
             _dataChanged(newData, oldData) {
 
                 var self = this;
+                var data = JSON.parse(JSON.stringify(self.data));
+                var maxVerticalNodes = self._getVerticalHeight(data);
+                var maxWidth = Math.max(maxVerticalNodes * 7, 500);
+                var maxHeight = Math.max(maxVerticalNodes * 10, 500);
 
-                var layout = d3.sankey().extent([[100, 10], [740, 800]]);
+                var layout = d3.sankey().extent([[100, 10], [maxWidth, maxHeight]]);
 
                 function selectNodeClick(node) {
-                    if (node.id.indexOf("rec^") != -1) {
+
+                    if (node && node.id.indexOf("rec^") != -1) {
                         var text = "<p>Therapy Selected: " + node.title + "</p>";
 
                         var pubchem_iframe =
@@ -204,17 +216,19 @@
                 }
 
                 function selectLinkClick(link) {
-                    var info = self.shadowRoot.querySelector(".info");
-                    info.innerHTML = "";
+                    if (link) {
+                        var info = self.shadowRoot.querySelector(".info");
+                        info.innerHTML = "";
 
-                    var text =
-                        "<p> Evidence Selected : " +
-                        link.source.title +
-                        " --> " +
-                        link.target.title +
-                        "</p>";
-                        
-                    info.innerHTML = text + "<p>" + link.title + "</p>";
+                        var text =
+                            "<p> Evidence Selected : <br/>" +
+                            link.source.title +
+                            " <br/> --> <br/>  " +
+                            link.target.title +
+                            "</p>";
+
+                        info.innerHTML = text + "<p>" + link.title + "</p>";
+                    }
                 }
 
                 var diagram = d3
@@ -245,119 +259,119 @@
                         .datum(ldata)
                         .call(diagram.groups(data.groups));
 
-                    // make recommendation bar draggable
-                    var dragSelector = self.shadowRoot.querySelector("#sankey > svg > g > g.groups > g.group.rec")
-                    var recgroup = d3.select(dragSelector);
-
-                    function dragr(d) {
-                        var e = d3.event;
-                        var eventType = "up";
-                        if(e.y)
-
-                        if (e.sourceEvent.type == "mouseup") {
-                            var ltdata = filterGraph(e.sourceEvent.y, ldata);
-                            drawSankey(layout(ltdata), data);
-                        } else {
-                            var ltdata = filterGraph(e.sourceEvent.y, layout(data));
-                            drawSankey(layout(ltdata), data);
-                        }
-                    }
-
-                    var dragresize = d3.drag().on("end", dragr);
-
-                    // var dragresizebar = recgroup
-                    //    .append("rect")
-                    //    .attr("class", "draghandle")
-                    //    .attr("x", function (d) {
-                    //        return d.rect.right - d.rect.left - 13;
-                    //    })
-                    //    .attr("y", function (d) {
-                    //        return d.rect.bottom - d.rect.top + 10;
-                    //    })
-                    //    .attr("width", function (d) {
-                    //        return d.rect.right - d.rect.left + 25;
-                    //    })
-                    //    .attr("height", function (d) {
-                    //        return 5;
-                    //    })
-                    //    .attr("fill", "blue")
-                    //    .attr("fill-opacity", 0.5)
-                    //    .attr("cursor", "ns-resize")
-                    //    .attr("style", "fill:blue;")
-                    //    .call(dragresize);
-
-                    function filterGraph(y, ldata) {
-
-                        var lcdata = {
-                            nodes: [],
-                            links: []
-                        };
-
-                        var removedData = {
-                            nodes: [],
-                            links: []
-                        };
-
-                        var lfcdata = {
-                            nodes: [],
-                            links: []
-                        };
-
-                        ldata.nodes.forEach(function (n, i) {
-                            if (n.id.indexOf("rec^") != 0) {
-                                lcdata.nodes.push(n);
-                            } else if (n.id.indexOf("rec^") == 0 && n.y0 <= y) {
-                                lcdata.nodes.push(n);
-                            } else {
-                                removedData.nodes.push(n.id);
+                    el.selectAll(".groups").selectAll("text")
+                        .each(function () {
+                            var text = d3.select(this);
+                            if (text.text() == "Molecular Profile") {
+                                text.on("click", function () {
+                                    data.order[0][0] = data.order[0][0].sort();
+                                    layout.ordering(data.order);
+                                    var lcdata = layout(data);
+                                    drawSankey(lcdata, data);
+                                });
+                            }
+                            else if (text.text() == "Inferred Targets") {
+                                text.on("click", function () {
+                                    data.order[1][0] = data.order[1][0].sort();
+                                    layout.ordering(data.order);
+                                    var lcdata = layout(data);
+                                    drawSankey(lcdata, data);
+                                });
+                            }
+                            else if (text.text() == "Recommended Therapies") {
+                                text.on("click", function () {
+                                    data.order[2][0] = data.order[2][0].sort();
+                                    layout.ordering(data.order);
+                                    var lcdata = layout(data);
+                                    drawSankey(lcdata, data);
+                                });
                             }
                         });
 
-                        ldata.links.forEach(function (l, i) {
-                            if (l.type != "Recommended therapies") {
-                                lcdata.links.push(l);
-                            } else if (l.type == "Recommended therapies" && l.target.y0 <= y) {
-                                lcdata.links.push(l);
-                            } else {
-                                removedData.links.push(l);
-                                removedData.nodes.push(l.source.id);
-                            }
-                        });
+                    el.selectAll(".groups").selectAll(".group.rec")
+                        .each(function () {
+                            var group = d3.select(this);
+                            console.log(this);
+                            console.log(ldata);
+                            console.log(data);
+                            var gdata = group.data()[0];
+                            var gyScale = d3.scaleLinear()
+                                .range([gdata.rect.top, gdata.rect.bottom]);
+                            var brush = d3.brushY()
+                                .extent([[-10, -20], [21, gdata.rect.bottom - gdata.rect.top]])
+                                .on('end', function () {
+                                    if (d3.event.sourceEvent.type === "brush") return;
+                                    console.log(d3.event.sourceEvent.offsetX);
+                                    console.log(d3.event.sourceEvent.offsetY);
+                                    console.log(gdata.rect);
+                                    var yLim = d3.event.sourceEvent.offsetY;
 
-                        return lcdata;
-                    }
+                                    var clData = JSON.parse(JSON.stringify(self.data));
+                                    if (clData.order) {
+                                        clData.order.forEach(function (g) {
+                                            g.forEach(function (d, i) {
+                                                if (!Array.isArray(d)) {
+                                                    g[i] = [d];
+                                                };
+                                            });
+                                            if (g.length == 1) {
+                                                g.push([]);
+                                            }
+                                        });
+                                        layout.ordering(clData.order);
+                                    }
+                                    var clcdata = layout(clData);
+
+                                    clcdata.links.forEach(function (cll) {
+                                        if (cll.type == "Recommended therapies" && cll.target.y1 > yLim && yLim > gdata.rect.top) {
+                                            cll.color = "rgb(238, 238, 238)";
+
+                                            cll.source.incoming.forEach(function (clli) {
+                                                clli.color = "rgb(238, 238, 238)";
+                                            })
+                                        }
+                                    });
+                                    drawSankey(clcdata, data);
+                                });
+
+                            var brushg = group.append("g")
+                                .attr("class", "brush")
+                                .call(brush);
+
+                            // brushg.selectAll('.overlay')
+                            //     .style('fill', '#4b9e9e');
+
+                            brushg.selectAll('.selection')
+                                .attr('fill', null)
+                                .attr('fill-opacity', 1)
+                                .style('fill', '#78c5c5');
+
+                            brushg.selectAll('rect.handle')
+                                .style('fill', '#276c86');
+                        });
                 }
 
-                var data = self.data;
-                
-                data.groups.forEach(function(g) {
-                  if(!Array.isArray(g.nodes)) {
-                    g.nodes = [g.nodes];
-                  };
+                data.groups.forEach(function (g) {
+                    if (!Array.isArray(g.nodes)) {
+                        g.nodes = [g.nodes];
+                    };
                 });
 
-                // d3.json(self.data, function (data) {
-                if(data.order) {
-                  
-                  data.order.forEach(function(g) {
-                    g.forEach(function(d, i) {
-                      if(!Array.isArray(d)) {
-                        g[i] = [d];
-                      };
+                if (data.order) {
+                    data.order.forEach(function (g) {
+                        g.forEach(function (d, i) {
+                            if (!Array.isArray(d)) {
+                                g[i] = [d];
+                            };
+                        });
+                        if (g.length == 1) {
+                            g.push([]);
+                        }
                     });
-                    if(g.length == 1) {
-                      g.push([]);
-                    }
-                  });
-                  
-                  layout.ordering(data.order);
+                    layout.ordering(data.order);
                 }
-                // console.log(data.links);
                 var ldata = layout(data);
                 drawSankey(ldata, data);
-                // });
-
-
                 self.shadowRoot.querySelector("paper-spinner-lite").active = false;
             }
         };
