@@ -27397,7 +27397,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             }
 
             #sankey {
-                height: 950px;
+                height: 100%;
+            }
+
+            #chart {
+                height: 100%;
             }
 
             svg .link {
@@ -27468,7 +27472,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <paper-spinner-lite active="" class="green"></paper-spinner-lite>
         <div class="chart">
             <div id="sankey" class="sankey">
-                <svg width="100%" height="100%"></svg>
+                <svg width="100%"></svg>
             </div>
             <div class="info-container">
                 <div class="info-con-container">
@@ -27574,6 +27578,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 var maxVerticalNodes = self._getVerticalHeight(data);
                 var maxWidth = Math.max(maxVerticalNodes * 7, 500);
                 var maxHeight = Math.max(maxVerticalNodes * 10, 500);
+
+                self.shadowRoot.querySelector("#sankey svg").setAttribute("height", maxHeight + 50);
+                // self.shadowRoot.querySelector("#sankey svg").setAttribute("width", maxWidth + 200);
 
                 var layout = d3.sankey().extent([[100, 10], [maxWidth, maxHeight]]);
 
