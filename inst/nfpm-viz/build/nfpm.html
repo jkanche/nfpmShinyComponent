@@ -27650,24 +27650,48 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                             var text = d3.select(this);
                             if (text.text() == "Molecular Profile") {
                                 text.on("click", function () {
-                                    data.order[0][0] = data.order[0][0].sort();
-                                    layout.ordering(data.order);
+                                    if (data.order) {
+                                        var felem = data.order[0][0][0];
+                                        var new_order = data.order[0][0].sort();
+                                        if (new_order[0] == felem) {
+                                            new_order = data.order[0][0].reverse();
+                                        }
+
+                                        data.order[0][0] = new_order;
+                                        layout.ordering(data.order);
+                                    }
                                     var lcdata = layout(data);
                                     drawSankey(lcdata, data);
                                 });
                             }
                             else if (text.text() == "Inferred Targets") {
                                 text.on("click", function () {
-                                    data.order[1][0] = data.order[1][0].sort();
-                                    layout.ordering(data.order);
+                                    if (data.order) {
+                                        var felem = data.order[1][0][0];
+                                        var new_order = data.order[1][0].sort();
+                                        if (new_order[0] == felem) {
+                                            new_order = data.order[1][0].reverse();
+                                        }
+                                        data.order[1][0] = new_order;
+
+                                        layout.ordering(data.order);
+                                    }
                                     var lcdata = layout(data);
                                     drawSankey(lcdata, data);
                                 });
                             }
                             else if (text.text() == "Recommended Therapies") {
                                 text.on("click", function () {
-                                    data.order[2][0] = data.order[2][0].sort();
-                                    layout.ordering(data.order);
+                                    if (data.order) {
+                                        var felem = data.order[2][0][0];
+                                        var new_order = data.order[2][0].sort();
+                                        if (new_order[0] == felem) {
+                                            new_order = data.order[2][0].reverse();
+                                        }
+                                        data.order[2][0] = new_order;
+
+                                        layout.ordering(data.order);
+                                    }
                                     var lcdata = layout(data);
                                     drawSankey(lcdata, data);
                                 });
@@ -27677,9 +27701,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     el.selectAll(".groups").selectAll(".group.rec")
                         .each(function () {
                             var group = d3.select(this);
-                            console.log(this);
-                            console.log(ldata);
-                            console.log(data);
+                            // console.log(this);
+                            // console.log(ldata);
+                            // console.log(data);
                             var gdata = group.data()[0];
                             var gyScale = d3.scaleLinear()
                                 .range([gdata.rect.top, gdata.rect.bottom]);
@@ -27687,9 +27711,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                                 .extent([[-10, -20], [21, gdata.rect.bottom - gdata.rect.top]])
                                 .on('end', function () {
                                     if (d3.event.sourceEvent.type === "brush") return;
-                                    console.log(d3.event.sourceEvent.offsetX);
-                                    console.log(d3.event.sourceEvent.offsetY);
-                                    console.log(gdata.rect);
+                                    // console.log(d3.event.sourceEvent.offsetX);
+                                    // console.log(d3.event.sourceEvent.offsetY);
+                                    // console.log(gdata.rect);
                                     var yLim = d3.event.sourceEvent.offsetY;
 
                                     var clData = JSON.parse(JSON.stringify(self.data));
