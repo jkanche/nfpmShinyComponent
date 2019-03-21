@@ -197,7 +197,7 @@
                 var self = this;
                 var data = JSON.parse(JSON.stringify(self.data));
                 var maxVerticalNodes = self._getVerticalHeight(data);
-                var maxWidth = Math.max(maxVerticalNodes * 7, 500);
+                var maxWidth = 500; //Math.max(maxVerticalNodes * 7, 500);
                 var maxHeight = Math.max(maxVerticalNodes * 10, 500);
 
                 self.shadowRoot.querySelector("#sankey svg").setAttribute("height", maxHeight + 50);
@@ -357,9 +357,18 @@
                                         if (cll.type == "Recommended therapies" && cll.target.y1 > yLim && yLim > gdata.rect.top) {
                                             cll.color = "rgb(238, 238, 238)";
 
-                                            cll.source.incoming.forEach(function (clli) {
-                                                clli.color = "rgb(238, 238, 238)";
-                                            })
+                                            var cFlag = false;
+                                            cll.source.outgoing.forEach(function (clli) {
+                                                if (clli.color != "rgb(238, 238, 238)") {
+                                                    cFlag = true;
+                                                }
+                                            });
+
+                                            if (!cFlag) {
+                                                cll.source.incoming.forEach(function (clli) {
+                                                    clli.color = "rgb(238, 238, 238)";
+                                                });
+                                            }
                                         }
                                     });
                                     drawSankey(clcdata, data);
