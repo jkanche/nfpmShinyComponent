@@ -27599,6 +27599,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         var info = self.shadowRoot.querySelector(".info");
                         info.innerHTML = text + pubchem_iframe;
                     }
+                    else if (node && (node.id.indexOf("mp^") != -1 || node.id.indexOf("it^")) ){
+                        Object.assign(document.createElement('a'), { target: '_blank', href: 'https://oncomx.org/searchview/?gene=' + node.title}).click();
+                    }
                 }
 
                 function selectLinkClick(link) {
